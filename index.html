@@ -184,9 +184,13 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
   border:none;border-radius:14px;cursor:pointer;
   box-shadow:0 4px 20px rgba(247,201,72,0.3);
   transition:transform 0.1s;letter-spacing:0.5px;
+  white-space:nowrap;
 }
 .next-btn:active{transform:scale(0.97);}
 .next-btn.ghost{background:transparent;color:var(--purple);border:1.5px solid var(--purple);box-shadow:none;font-size:14px;padding:12px;}
+.btn-row{display:flex;gap:8px;margin-top:4px;}
+.btn-row .next-btn{margin-top:0;flex:1;}
+.btn-row .next-btn.ghost{flex:0 0 30%;padding:12px 0;}
 
 /* ── 상환 비교 ── */
 .versus{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);}
@@ -440,9 +444,9 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
     </div>
     <div class="stress-box" id="stress-info">스트레스 금리 계산 중...</div>
   </div>
-  <div style="display:flex;gap:8px;">
+  <div class="btn-row">
     <button class="next-btn ghost" onclick="goStep(0)">← 이전</button>
-    <button class="next-btn" onclick="goStep(2)">다음 — 집 정보 입력하기 →</button>
+    <button class="next-btn" onclick="goStep(2)">다음 — 집 정보 입력 →</button>
   </div>
 </div>
 
@@ -498,7 +502,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
       🎖️ <b>생애최초 혜택 적용 중!</b><br>모든 지역 LTV <b>80%</b> · 수도권 <b>6억</b> 상한 동일 · 취득세 <b>200만원 감면</b>
     </div>
   </div>
-  <div style="display:flex;gap:8px;">
+  <div class="btn-row">
     <button class="next-btn ghost" onclick="goStep(1)">← 이전</button>
     <button class="next-btn" onclick="goStep(3)">결과 보기 🎉</button>
   </div>
