@@ -1264,6 +1264,7 @@ function showDebtInfo() {
   ].map(p=>`<div class="sheet-pro"><span class="sheet-pro-icon">${p.icon}</span><span>${p.text}</span></div>`).join('');
   document.getElementById('sheet-backdrop').classList.add('show');
   document.getElementById('repay-sheet').classList.add('show');
+  document.getElementById('sheet-calc-box').style.display = 'none';
   document.body.style.overflow = 'hidden';
 }
 
