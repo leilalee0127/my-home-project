@@ -874,12 +874,18 @@ function getSel(id){
 
 if(!window.extraChecked) window.extraChecked={'ex-mov':true,'ex-rep':true};
 
-function renderExtra(aqRate,aqFinal,eduTax,ruralTax,agRate,agFee,regFee,movFee,repFee){
+function renderExtra(aqRate,aqFinal,aqTax,eduTax,ruralTax,agRate,agFee,regFee,movFee,repFee){
+  const discount = firstHome && aqTax > aqFinal ? aqTax - aqFinal : 0;
   const required=[
-    {id:'ex-acq', icon:'🏛️',name:'취득세',         desc:firstHome?'생애최초 200만원 감면':`${(aqRate*100).toFixed(1)}% 적용`, val:aqFinal,       basis:`교육세 +${fmtFull(eduTax)} 별도`},
-    {id:'ex-edu', icon:'📚',name:'지방교육세+농특세',desc:'취득세 납부 시 함께',                                              val:eduTax+ruralTax,basis:'취득세액 기준'},
-    {id:'ex-agt', icon:'🤝',name:'중개보수',         desc:'법정 상한 요율 기준',                                             val:agFee,          basis:`요율 ${(agRate*100).toFixed(2)}%`},
-    {id:'ex-reg', icon:'📝',name:'등기비용',         desc:'소유권 이전 등기',                                                val:regFee,         basis:'법무사 수수료 포함'},
+    {id:'ex-acq', icon:'🏛️', name:'취득세',
+      desc: firstHome
+        ? `원래 ${fmtFull(aqTax)} → 생애최초 감면 후`
+        : `${(aqRate*100).toFixed(1)}% 적용`,
+      val:aqFinal, basis:`교육세 +${fmtFull(eduTax)} 별도`},
+    ...(discount > 0 ? [{id:'ex-disc', icon:'🎖️', name:'생애최초 취득세 감면', desc:'취득세에서 자동 차감됨', val:-discount, basis:'12억 이하 주택 한정'}] : []),
+    {id:'ex-edu', icon:'📚',name:'지방교육세+농특세',desc:'취득세 납부 시 함께',val:eduTax+ruralTax,basis:'취득세액 기준'},
+    {id:'ex-agt', icon:'🤝',name:'중개보수',         desc:'법정 상한 요율 기준',val:agFee,          basis:`요율 ${(agRate*100).toFixed(2)}%`},
+    {id:'ex-reg', icon:'📝',name:'등기비용',         desc:'소유권 이전 등기',   val:regFee,         basis:'법무사 수수료 포함'},
   ];
   const optional=[
     {id:'ex-mov',icon:'🚚',name:'이사비',       desc:'포장이사 추산',    val:movFee,basis:'규모·거리에 따라 상이'},
@@ -891,6 +897,7 @@ function renderExtra(aqRate,aqFinal,eduTax,ruralTax,agRate,agFee,regFee,movFee,r
   const all=[...required,...optional];
   document.getElementById('extra-rows').innerHTML=all.map(it=>{
     const isOpt=optional.some(o=>o.id===it.id);
+    const isDiscount=it.id==='ex-disc';
     const checked=!isOpt||window.extraChecked[it.id];
     return `<div class="extra-row"${isOpt&&!checked?' style="opacity:0.38"':''}>
       <div class="extra-row-left">
@@ -901,12 +908,14 @@ function renderExtra(aqRate,aqFinal,eduTax,ruralTax,agRate,agFee,regFee,movFee,r
         </div>
       </div>
       <div class="extra-row-right">
-        <div class="extra-val">${fmtFull(it.val)}</div>
+        <div class="extra-val" style="${isDiscount?'color:var(--green)':''}">
+          ${isDiscount?'−':''}${fmtFull(Math.abs(it.val))}
+        </div>
         ${isOpt?`<label class="ex-toggle"><input type="checkbox" ${checked?'checked':''} onchange="window.extraChecked['${it.id}']=this.checked;window._renderExtra()"><span class="ex-knob"></span></label>`:''}
       </div>
     </div>`;
   }).join('');
-  document.getElementById('extra-total').textContent=fmtFull(total);
+  document.getElementById('extra-total').textContent=fmtFull(Math.max(0,total));
 }
 
 function calc(){
@@ -1056,7 +1065,7 @@ function calc(){
     const regFee=Math.min(housePrice*0.002,1500000)+200000;
     const movFee=housePrice<300000000?800000:housePrice<600000000?1200000:1800000;
     const repFee=housePrice*0.01;
-    window._renderExtra=()=>renderExtra(aqRate,aqFinal,eduTax,ruralTax,agRate,agFee,regFee,movFee,repFee);
+    window._renderExtra=()=>renderExtra(aqRate,aqFinal,aqTax,eduTax,ruralTax,agRate,agFee,regFee,movFee,repFee);
     window._renderExtra();
   }
 }
