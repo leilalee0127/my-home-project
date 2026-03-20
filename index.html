@@ -952,37 +952,36 @@ function getSel(id){
 }
 
 if(!window.extraChecked) window.extraChecked={'ex-mov':true,'ex-rep':true};
+if(!window.extraVals)    window.extraVals   ={'ex-mov':0,   'ex-rep':0};
 
-function renderExtra(aqRate,aqFinal,aqTax,eduTax,ruralTax,agRate,agFee,regFee,movFee,repFee){
+function renderExtra(aqRate,aqFinal,aqTax,eduTax,ruralTax,agRate,agFee,regFee){
   const discount = firstHome && aqTax > aqFinal ? aqTax - aqFinal : 0;
   const required=[
     {id:'ex-acq', icon:'🏛️', name:'취득세',
-      desc: firstHome
-        ? `원래 ${fmtFull(aqTax)} → 생애최초 감면 후`
-        : `${(aqRate*100).toFixed(1)}% 적용`,
+      desc: firstHome ? `원래 ${fmtFull(aqTax)} → 생애최초 감면 후` : `${(aqRate*100).toFixed(1)}% 적용`,
       val:aqFinal, basis:`교육세 +${fmtFull(eduTax)} 별도`},
-    ...(discount > 0 ? [{id:'ex-disc', icon:'🎖️', name:'생애최초 취득세 감면', desc:'취득세에서 자동 차감됨', val:-discount, basis:'12억 이하 주택 한정'}] : []),
+    ...(discount>0?[{id:'ex-disc',icon:'🎖️',name:'생애최초 취득세 감면',desc:'취득세에서 자동 차감됨',val:-discount,basis:'12억 이하 주택 한정'}]:[]),
     {id:'ex-edu', icon:'📚',name:'지방교육세+농특세',desc:'취득세 납부 시 함께',val:eduTax+ruralTax,basis:'취득세액 기준'},
     {id:'ex-agt', icon:'🤝',name:'중개보수',         desc:'법정 상한 요율 기준',val:agFee,          basis:`요율 ${(agRate*100).toFixed(2)}%`},
     {id:'ex-reg', icon:'📝',name:'등기비용',         desc:'소유권 이전 등기',   val:regFee,         basis:'법무사 수수료 포함'},
   ];
   const optional=[
-    {id:'ex-mov',icon:'🚚',name:'이사비',       desc:'포장이사 추산',    val:movFee,basis:'규모·거리에 따라 상이'},
-    {id:'ex-rep',icon:'🔨',name:'인테리어·수리',desc:'도배·장판 등 추산',val:repFee,basis:'시세의 약 1%'},
+    {id:'ex-mov',icon:'🚚',name:'이사비',       desc:'직접 입력'},
+    {id:'ex-rep',icon:'🔨',name:'인테리어·수리',desc:'직접 입력'},
   ];
-  let total=required.reduce((s,i)=>s+i.val,0);
-  optional.forEach(i=>{if(window.extraChecked[i.id]) total+=i.val;});
 
-  const all=[...required,...optional];
-  document.getElementById('extra-rows').innerHTML=all.map(it=>{
-    const isOpt=optional.some(o=>o.id===it.id);
+  let total=required.reduce((s,i)=>s+i.val,0);
+  optional.forEach(i=>{
+    if(window.extraChecked[i.id]) total+=window.extraVals[i.id]||0;
+  });
+
+  const requiredHTML=required.map(it=>{
     const isDiscount=it.id==='ex-disc';
-    const checked=!isOpt||window.extraChecked[it.id];
-    return `<div class="extra-row"${isOpt&&!checked?' style="opacity:0.38"':''}>
+    return `<div class="extra-row">
       <div class="extra-row-left">
         <span class="extra-icon-sm">${it.icon}</span>
         <div>
-          <div class="extra-name">${it.name}${isOpt?'<span class="opt-tag">선택</span>':''}</div>
+          <div class="extra-name">${it.name}</div>
           <div class="extra-desc">${it.desc} · ${it.basis}</div>
         </div>
       </div>
@@ -990,11 +989,48 @@ function renderExtra(aqRate,aqFinal,aqTax,eduTax,ruralTax,agRate,agFee,regFee,mo
         <div class="extra-val" style="${isDiscount?'color:var(--green)':''}">
           ${isDiscount?'−':''}${fmtFull(Math.abs(it.val))}
         </div>
-        ${isOpt?`<label class="ex-toggle"><input type="checkbox" ${checked?'checked':''} onchange="window.extraChecked['${it.id}']=this.checked;window._renderExtra()"><span class="ex-knob"></span></label>`:''}
       </div>
     </div>`;
   }).join('');
-  document.getElementById('extra-total').textContent=fmtFull(Math.max(0,total));
+
+  const optionalHTML=optional.map(it=>{
+    const checked=window.extraChecked[it.id];
+    const val=window.extraVals[it.id]||0;
+    return `<div class="extra-row" id="row-${it.id}"${!checked?' style="opacity:0.38"':''}>
+      <div class="extra-row-left">
+        <span class="extra-icon-sm">${it.icon}</span>
+        <div>
+          <div class="extra-name">${it.name}<span class="opt-tag">선택</span></div>
+          <div class="extra-desc">${it.desc}</div>
+        </div>
+      </div>
+      <div class="extra-row-right" style="gap:8px;">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <input type="number" id="input-${it.id}" value="${Math.round(val/10000)||0}" min="0" step="10"
+            inputmode="numeric"
+            style="width:80px;background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;color:var(--yellow2);font-family:'DM Mono',monospace;font-size:13px;padding:6px 8px;text-align:right;-moz-appearance:textfield;"
+            onfocus="if(this.value==='0')this.value=''"
+            onblur="if(this.value==='')this.value='0'"
+            oninput="window.extraVals['${it.id}']=parseFloat(this.value||0)*10000;updateExtraTotal()">
+          <span style="font-size:11px;color:var(--muted);">만원</span>
+        </div>
+        <label class="ex-toggle"><input type="checkbox" ${checked?'checked':''} onchange="window.extraChecked['${it.id}']=this.checked;document.getElementById('row-${it.id}').style.opacity=this.checked?'1':'0.38';updateExtraTotal()"><span class="ex-knob"></span></label>
+      </div>
+    </div>`;
+  }).join('');
+
+  window._requiredTotal = required.reduce((s,i)=>s+i.val, 0);
+  document.getElementById('extra-rows').innerHTML=requiredHTML+optionalHTML;
+  updateExtraTotal();
+}
+
+function updateExtraTotal(){
+  let total = window._requiredTotal || 0;
+  ['ex-mov','ex-rep'].forEach(id=>{
+    if(window.extraChecked[id]) total+=window.extraVals[id]||0;
+  });
+  const el=document.getElementById('extra-total');
+  if(el) el.textContent=fmtFull(Math.max(0,total));
 }
 
 function calc(){
@@ -1192,12 +1228,21 @@ function calc(){
     else agRate=0.005;
     const agFee=Math.min(housePrice*agRate,housePrice<200000000?800000:housePrice<900000000?3000000:9000000);
     const regFee=Math.min(housePrice*0.002,1500000)+200000;
-    const movFee=housePrice<300000000?800000:housePrice<600000000?1200000:1800000;
-    const repFee=housePrice*0.01;
-    window._renderExtra=()=>renderExtra(aqRate,aqFinal,aqTax,eduTax,ruralTax,agRate,agFee,regFee,movFee,repFee);
+    window._renderExtra=()=>renderExtra(aqRate,aqFinal,aqTax,eduTax,ruralTax,agRate,agFee,regFee);
     window._renderExtra();
   }
 }
+
+// 숫자 입력란 포커스 시 0이면 비우기, 아니면 전체 선택
+document.addEventListener('focusin', e => {
+  if(e.target.type === 'number') {
+    if(parseFloat(e.target.value) === 0) e.target.value = '';
+    else e.target.select();
+  }
+});
+document.addEventListener('focusout', e => {
+  if(e.target.type === 'number' && e.target.value === '') e.target.value = '0';
+});
 
 calc();
 
