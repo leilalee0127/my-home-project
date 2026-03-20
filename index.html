@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f0e17">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>🏠 내집마련 프로젝트</title>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#0f0e17;--bg2:#1a1828;--card:#1e1c2e;--card2:#252338;
+  --border:#2e2b48;--border2:#3d3960;
+  --yellow:#f7c948;--yellow2:#fde68a;
+  --purple:#a78bfa;--purple2:#7c3aed;
+  --blue:#60a5fa;--green:#34d399;
+  --red:#f87171;--orange:#fb923c;
+  --text:#e8e6f0;--muted:#6b6889;
+}
+html,body{min-height:100%;}
+body{
+  font-family:'Noto Sans KR',sans-serif;
+  background:var(--bg);color:var(--text);
+  font-size:15px;overflow-x:hidden;
+  padding-bottom:calc(env(safe-area-inset-bottom) + 20px);
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    radial-gradient(1px 1px at 20% 15%,rgba(255,255,255,0.35) 0%,transparent 100%),
+    radial-gradient(1.5px 1.5px at 75% 30%,rgba(255,255,255,0.45) 0%,transparent 100%),
+    radial-gradient(1px 1px at 40% 65%,rgba(255,255,255,0.25) 0%,transparent 100%),
+    radial-gradient(1px 1px at 88% 78%,rgba(255,255,255,0.35) 0%,transparent 100%);
+  pointer-events:none;z-index:0;
+}
+
+/* ── 헤더 ── */
+.header{position:relative;z-index:10;text-align:center;padding:28px 20px 18px;}
+.header-eyebrow{font-size:10px;letter-spacing:3px;color:var(--purple);text-transform:uppercase;margin-bottom:6px;}
+.header-title{font-family:'Jua',sans-serif;font-size:28px;color:var(--yellow);text-shadow:0 0 24px rgba(247,201,72,0.4);margin-bottom:8px;}
+.badge-row{display:flex;justify-content:center;gap:5px;flex-wrap:wrap;margin-bottom:16px;}
+.badge{font-size:10px;border-radius:20px;padding:2px 9px;font-family:'DM Mono',monospace;}
+.badge.red{background:rgba(248,113,113,0.15);color:var(--red);border:1px solid rgba(248,113,113,0.3);}
+.badge.warn{background:rgba(251,146,60,0.12);color:var(--orange);border:1px solid rgba(251,146,60,0.25);}
+.badge.info{background:rgba(96,165,250,0.12);color:var(--blue);border:1px solid rgba(96,165,250,0.25);}
+
+/* ── 스텝 진행바 ── */
+.step-nav{margin:0 auto;}
+.step-track{display:flex;align-items:center;}
+.step-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.step-dot{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Jua',sans-serif;font-size:13px;
+  border:2px solid var(--border2);color:var(--muted);
+  background:var(--card2);transition:all 0.3s;cursor:pointer;
+}
+.step-dot.done{background:var(--purple2);border-color:var(--purple);color:#fff;}
+.step-dot.active{background:var(--yellow);border-color:var(--yellow2);color:#000;box-shadow:0 0 12px rgba(247,201,72,0.4);}
+.step-label{font-size:9px;color:var(--muted);text-align:center;white-space:nowrap;}
+.step-dot.active + .step-label{color:var(--yellow);}
+.step-dot.done + .step-label{color:var(--text);}
+.step-line{flex:1;height:2px;background:var(--border);margin:0 -2px;position:relative;top:-8px;z-index:1;transition:background 0.3s;}
+.step-line.done{background:var(--purple2);}
+
+/* ── 페이지 ── */
+.page{position:relative;z-index:10;padding:0 14px 24px;}
+.step-panel{display:none;margin-top:12px;}
+.step-panel.active{display:block;}
+.summary-view{display:none;margin-top:12px;}
+.summary-view.active{display:block;}
+
+/* ── 대시보드 (결과 화면에만) ── */
+.dashboard{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;margin-bottom:12px;}
+.dash-main{padding:16px 18px 12px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.dash-item{text-align:center;}
+.dash-label{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.dash-val{font-family:'DM Mono',monospace;font-size:19px;font-weight:500;line-height:1;}
+.dash-val.yellow{color:var(--yellow);}
+.dash-val.green{color:var(--green);}
+.dash-val.blue{color:var(--blue);}
+.dash-val.red{color:var(--red);}
+.dash-sub{font-size:10px;color:var(--muted);margin-top:3px;}
+
+/* 한도 근거 행 */
+.dash-limits{display:flex;align-items:center;padding:10px 18px;border-bottom:1px solid var(--border);}
+.dash-limit-item{flex:1;text-align:center;}
+.dash-limit-label{display:block;font-size:10px;color:var(--muted);letter-spacing:0.5px;margin-bottom:3px;}
+.dash-limit-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--text);}
+.dash-limit-val.active{color:var(--orange);}
+.dash-limit-divider{width:1px;height:28px;background:var(--border);flex-shrink:0;}
+
+/* 내가 준비해야 할 돈 */
+.dash-mymoney{padding:11px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.dash-mymoney-label{font-size:12px;color:var(--muted);}
+.dash-mymoney-right{text-align:right;}
+.dash-mymoney-calc{display:flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);}
+.dash-mymoney-calc .hp{color:var(--text);}
+.dash-mymoney-calc .loan{color:var(--blue);}
+.dash-mymoney-result{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--yellow);}
+
+/* DSR 게이지 */
+.dash-dsr{padding:10px 18px;}
+.dsr-top{display:flex;justify-content:space-between;margin-bottom:6px;}
+.dsr-title-sm{font-size:11px;color:var(--muted);}
+.dsr-pct{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
+.dsr-bar-bg{height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.dsr-bar-fill{height:100%;border-radius:4px;transition:width 0.5s cubic-bezier(0.4,0,0.2,1),background 0.3s;}
+.dsr-status{font-size:10px;color:var(--muted);margin-top:4px;text-align:right;}
+
+/* ── 섹션 카드 ── */
+.section{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:12px;}
+.section-head{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--border);background:var(--card2);}
+.section-icon{font-size:17px;}
+.section-title{font-family:'Jua',sans-serif;font-size:15px;color:var(--yellow);}
+.section-tag{margin-left:auto;font-size:10px;background:rgba(167,139,250,0.15);color:var(--purple);border:1px solid rgba(167,139,250,0.3);border-radius:20px;padding:2px 9px;}
+
+/* 스텝 헤더 */
+.step-header{text-align:center;padding:18px 20px 14px;}
+.step-q{font-family:'Jua',sans-serif;font-size:20px;color:var(--text);margin-bottom:6px;line-height:1.4;}
+.step-desc{font-size:12px;color:var(--muted);line-height:1.6;}
+
+/* ── 입력 행 ── */
+.irow{display:flex;align-items:center;padding:13px 18px;border-bottom:1px solid var(--border);gap:10px;min-height:58px;}
+.irow:last-child{border-bottom:none;}
+.irow-left{flex:1;min-width:0;}
+.irow-name{font-size:13px;color:var(--text);font-weight:500;line-height:1.3;}
+.irow-hint{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.irow-hint.warn{color:var(--orange);}
+.irow-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+
+input[type="number"]{
+  width:110px;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;
+  color:var(--yellow2);font-family:'DM Mono',monospace;font-size:15px;font-weight:500;
+  padding:9px 10px;text-align:right;-moz-appearance:textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button{-webkit-appearance:none;}
+input[type="number"]:focus{outline:none;border-color:var(--purple);box-shadow:0 0 0 3px rgba(167,139,250,0.15);}
+select{
+  background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;
+  color:var(--yellow2);font-family:'DM Mono',monospace;font-size:13px;font-weight:500;
+  padding:9px 28px 9px 10px;width:148px;cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6889' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;
+}
+select:focus{outline:none;border-color:var(--purple);}
+select option{background:#1a1828;}
+.qunit{font-size:12px;color:var(--muted);}
+.uk-text{font-size:11px;color:var(--green);font-family:'DM Mono',monospace;font-weight:500;display:none;margin-top:3px;text-align:right;}
+
+/* 슬라이더 */
+.slider-block{padding:4px 18px 14px;}
+.slider-info{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px;}
+.slider-info strong{color:var(--purple);font-family:'DM Mono',monospace;font-size:13px;}
+input[type="range"]{width:100%;height:6px;-webkit-appearance:none;appearance:none;background:var(--border);border-radius:3px;cursor:pointer;}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--purple);border:3px solid var(--bg);box-shadow:0 0 8px rgba(167,139,250,0.5);}
+
+/* 스트레스 박스 */
+.stress-box{margin:0 18px 14px;padding:10px 13px;background:rgba(251,146,60,0.08);border:1px solid rgba(251,146,60,0.2);border-radius:9px;font-size:11.5px;color:#fdba74;line-height:1.7;}
+.stress-box b{color:var(--orange);}
+
+/* 토글 */
+.toggle-wrap{display:flex;align-items:center;gap:8px;}
+.toggle-btn{position:relative;width:48px;height:26px;background:var(--border2);border:none;border-radius:13px;cursor:pointer;padding:0;transition:background 0.25s;flex-shrink:0;}
+.toggle-btn[data-on="true"]{background:var(--green);}
+.toggle-knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform 0.25s cubic-bezier(0.34,1.56,0.64,1);display:block;}
+.toggle-btn[data-on="true"] .toggle-knob{transform:translateX(22px);}
+.toggle-label{font-size:13px;color:var(--muted);font-weight:500;}
+.toggle-btn[data-on="true"] + .toggle-label{color:var(--green);}
+.first-home-badge{display:none;margin:0 18px 12px;padding:10px 13px;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.3);border-left:3px solid var(--green);border-radius:0 8px 8px 0;font-size:11.5px;color:#6ee7b7;line-height:1.7;}
+.first-home-badge.show{display:block;}
+.first-home-badge b{color:var(--green);}
+
+/* 툴팁 CSS 제거됨 — 바텀시트 방식으로 통일 */
+
+/* 버튼 */
+.next-btn{
+  width:100%;padding:16px;margin-top:4px;
+  background:var(--yellow);color:#000;
+  font-family:'Jua',sans-serif;font-size:17px;
+  border:none;border-radius:14px;cursor:pointer;
+  box-shadow:0 4px 20px rgba(247,201,72,0.3);
+  transition:transform 0.1s;letter-spacing:0.5px;
+}
+.next-btn:active{transform:scale(0.97);}
+.next-btn.ghost{background:transparent;color:var(--purple);border:1.5px solid var(--purple);box-shadow:none;font-size:14px;padding:12px;}
+
+/* ── 상환 비교 ── */
+.versus{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);}
+.battle{border-radius:12px;padding:13px;text-align:center;}
+.battle.blue{background:rgba(96,165,250,0.08);border:1.5px solid rgba(96,165,250,0.3);}
+.battle.green{background:rgba(52,211,153,0.08);border:1.5px solid rgba(52,211,153,0.3);}
+.battle-name{font-size:10px;font-weight:700;letter-spacing:0.5px;margin-bottom:5px;}
+.battle.blue .battle-name{color:var(--blue);}
+.battle.green .battle-name{color:var(--green);}
+.battle-amt{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;color:var(--text);}
+.battle-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+.stat-rows{padding:4px 18px;}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.srow:last-child{border-bottom:none;}
+.srow .sl{color:var(--muted);}
+.srow .sv{font-family:'DM Mono',monospace;font-weight:500;}
+.srow .sv.red{color:var(--red);}
+.srow .sv.yellow{color:var(--yellow);}
+.save-row{margin:0 18px 14px;padding:10px 13px;background:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.25);border-radius:9px;font-size:12px;color:var(--green);display:flex;gap:7px;align-items:flex-start;line-height:1.6;}
+.save-row b{font-weight:700;}
+
+/* ── 부대비용 ── */
+.extra-row{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border);gap:10px;transition:opacity 0.25s;}
+.extra-row:last-child{border-bottom:none;}
+.extra-row-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0;}
+.extra-icon-sm{font-size:20px;flex-shrink:0;}
+.extra-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;}
+.extra-desc{font-size:10px;color:var(--muted);line-height:1.5;}
+.opt-tag{display:inline-block;font-size:9px;background:rgba(167,139,250,0.15);color:var(--purple);border:1px solid rgba(167,139,250,0.3);border-radius:4px;padding:0 5px;margin-left:5px;vertical-align:middle;font-weight:400;}
+.extra-row-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.extra-val{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--orange);white-space:nowrap;}
+.ex-toggle{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0;}
+.ex-toggle input{opacity:0;width:0;height:0;position:absolute;}
+.ex-knob{position:absolute;inset:0;border-radius:10px;background:var(--border2);cursor:pointer;transition:background 0.2s;}
+.ex-knob::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform 0.2s cubic-bezier(0.34,1.56,0.64,1);}
+.ex-toggle input:checked + .ex-knob{background:var(--green);}
+.ex-toggle input:checked + .ex-knob::after{transform:translateX(16px);}
+.extra-total{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-top:1px solid var(--border);background:rgba(247,201,72,0.04);}
+.etl{font-family:'Jua',sans-serif;font-size:15px;color:var(--yellow);}
+.ets{font-size:11px;color:var(--muted);margin-top:2px;}
+.extra-total-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--yellow);text-shadow:0 0 14px rgba(247,201,72,0.3);}
+.extra-note{padding:10px 18px 14px;font-size:11px;color:var(--muted);line-height:1.7;border-top:1px solid var(--border);}
+
+/* ── 통일된 물음표 아이콘 ── */
+.q-icon {
+  display:inline-flex;align-items:center;justify-content:center;
+  width:17px;height:17px;border-radius:50%;
+  background:var(--border2);color:var(--purple);
+  font-size:10px;font-weight:700;font-family:'DM Mono',monospace;
+  border:1px solid var(--purple);vertical-align:middle;margin-left:5px;
+  cursor:pointer;transition:background 0.15s,color 0.15s;
+  flex-shrink:0;
+}
+.q-icon:hover{background:var(--purple);color:#fff;}
+
+.sheet-backdrop {
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.6);z-index:500;
+  backdrop-filter:blur(2px);
+}
+.sheet-backdrop.show{display:block;}
+.sheet {
+  position:fixed;bottom:0;left:0;right:0;z-index:501;
+  background:var(--card2);border-radius:20px 20px 0 0;
+  padding:0 0 calc(env(safe-area-inset-bottom) + 16px);
+  transform:translateY(100%);
+  transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
+  max-width:480px;margin:0 auto;
+}
+.sheet.show{transform:translateY(0);}
+.sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:12px auto 0;}
+.sheet-header{display:flex;align-items:center;gap:10px;padding:16px 20px 12px;}
+.sheet-emoji{font-size:22px;}
+.sheet-title{font-family:'Jua',sans-serif;font-size:18px;color:var(--yellow);}
+.sheet-body{padding:0 20px 8px;}
+.sheet-desc{font-size:13px;color:var(--text);line-height:1.8;margin-bottom:14px;}
+.sheet-pros{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.sheet-pro{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#c4c0d8;line-height:1.6;}
+.sheet-pro-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.sheet-tag{display:inline-block;font-size:11px;border-radius:6px;padding:2px 8px;margin-bottom:12px;font-weight:500;}
+.sheet-tag.blue{background:rgba(96,165,250,0.15);color:var(--blue);border:1px solid rgba(96,165,250,0.3);}
+.sheet-tag.green{background:rgba(52,211,153,0.15);color:var(--green);border:1px solid rgba(52,211,153,0.3);}
+.sheet-close{
+  width:calc(100% - 40px);margin:4px 20px 0;
+  padding:13px;background:var(--border);border:none;border-radius:12px;
+  color:var(--text);font-family:'Noto Sans KR',sans-serif;font-size:14px;font-weight:500;
+  cursor:pointer;
+}
+
+/* ── 아이콘 & 바텀시트 ── */
+.accordion-btn{
+  width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:13px 18px;margin-top:4px;
+  background:var(--card2);border:1px solid var(--border);border-radius:12px;
+  color:var(--muted);font-family:'Noto Sans KR',sans-serif;font-size:13px;font-weight:500;
+  cursor:pointer;transition:color 0.2s,border-color 0.2s;
+}
+.accordion-btn:hover{color:var(--text);border-color:var(--border2);}
+.accordion-btn.open{color:var(--yellow);border-color:var(--yellow);border-radius:12px 12px 0 0;border-bottom:none;}
+.accordion-arrow{font-size:14px;transition:transform 0.3s;display:inline-block;}
+.accordion-btn.open .accordion-arrow{transform:rotate(180deg);}
+.accordion-body{display:none;border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;background:var(--card);}
+.accordion-body.open{display:block;}
+
+/* 규정 알림 */
+.rule-box{margin-bottom:12px;padding:11px 16px;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.2);border-radius:12px;display:flex;gap:10px;align-items:flex-start;}
+.rule-box-icon{font-size:15px;flex-shrink:0;margin-top:1px;}
+.rule-box-text{font-size:11px;color:#fca5a5;line-height:1.7;}
+.rule-box-text b{color:var(--red);}
+
+/* 면책 */
+.disclaimer{text-align:center;font-size:11px;color:var(--muted);line-height:1.7;padding:14px 20px 8px;position:relative;z-index:10;}
+
+@media(min-width:768px){
+  .header,.page,.disclaimer{max-width:480px;margin-left:auto;margin-right:auto;}
+}
+</style>
+</head>
+<body>
+
+<!-- 헤더 + 스텝 진행바 -->
+<div class="header">
+  <div class="header-eyebrow">✦ 2026 내집마련 프로젝트 ✦</div>
+  <div class="header-title">🏠 내집마련 계산기</div>
+  <div class="badge-row">
+    <span class="badge red">🔴 스트레스 DSR 3단계</span>
+    <span class="badge warn">⚠️ 수도권 6억 상한</span>
+    <span class="badge info">📅 2026년 3월</span>
+  </div>
+  <div class="step-nav">
+    <div class="step-track">
+      <div class="step-dot-wrap">
+        <div class="step-dot active" id="dot-0" onclick="goStep(0)">1</div>
+        <div class="step-label">내 정보</div>
+      </div>
+      <div class="step-line" id="line-0"></div>
+      <div class="step-dot-wrap">
+        <div class="step-dot" id="dot-1" onclick="goStep(1)">2</div>
+        <div class="step-label">대출 조건</div>
+      </div>
+      <div class="step-line" id="line-1"></div>
+      <div class="step-dot-wrap">
+        <div class="step-dot" id="dot-2" onclick="goStep(2)">3</div>
+        <div class="step-label">집 정보</div>
+      </div>
+      <div class="step-line" id="line-2"></div>
+      <div class="step-dot-wrap">
+        <div class="step-dot" id="dot-3" onclick="goStep(3)">✓</div>
+        <div class="step-label">결과 보기</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+<!-- ══ STEP 1: 내 정보 ══ -->
+<div class="step-panel active" id="step-0">
+  <div class="section">
+    <div class="step-header">
+      <div class="step-q">💼 먼저 내 재정 상황을<br>알려주세요!</div>
+      <div class="step-desc">대출 가능 금액은 소득과 기존 부채에 따라 달라져요</div>
+    </div>
+    <div class="irow">
+      <div class="irow-left">
+        <div class="irow-name">연간 소득 💰</div>
+        <div class="irow-hint">세전 연봉 (근로·사업·임대소득)</div>
+      </div>
+      <div class="irow-right" style="flex-direction:column;align-items:flex-end;gap:3px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input type="number" id="income" value="5000" step="100" inputmode="numeric" oninput="calc()">
+          <span class="qunit">만원</span>
+        </div>
+        <span class="uk-text" id="income-uk"></span>
+      </div>
+    </div>
+    <div class="irow" style="border-bottom:none;">
+      <div class="irow-left">
+        <div class="irow-name">
+          기존 부채 상환액 ⚠️
+          <span class="q-icon" onclick="showDebtInfo()">?</span>
+        </div>
+        <div class="irow-hint">현재 모든 대출의 연간 원리금 합계 (없으면 0)</div>
+      </div>
+      <div class="irow-right">
+        <input type="number" id="existing" value="0" step="10" inputmode="numeric" oninput="calc()">
+        <span class="qunit">만원</span>
+      </div>
+    </div>
+  </div>
+  <button class="next-btn" onclick="goStep(1)">다음 — 대출 조건 입력하기 →</button>
+</div>
+
+<!-- ══ STEP 2: 대출 조건 ══ -->
+<div class="step-panel" id="step-1">
+  <div class="section">
+    <div class="step-header">
+      <div class="step-q">🏦 어떤 조건으로<br>빌릴 건가요?</div>
+      <div class="step-desc">금리와 기간에 따라 월 상환액이 크게 달라져요</div>
+    </div>
+    <div class="irow">
+      <div class="irow-left">
+        <div class="irow-name">금리 유형 📊</div>
+        <div class="irow-hint">변동금리는 스트레스 금리 추가 적용</div>
+      </div>
+      <div class="irow-right">
+        <select id="rate-type" onchange="calc()">
+          <option value="fixed">고정금리</option>
+          <option value="variable" selected>변동금리</option>
+        </select>
+      </div>
+    </div>
+    <div class="irow">
+      <div class="irow-left">
+        <div class="irow-name">금리 (연) 🎯</div>
+        <div class="irow-hint">2026년 기준 약 3.5~6%대</div>
+      </div>
+      <div class="irow-right">
+        <input type="number" id="rate" value="4.0" step="0.1" min="0.1" max="20" inputmode="decimal" oninput="syncSlider();calc()">
+        <span class="qunit">%</span>
+      </div>
+    </div>
+    <div class="slider-block">
+      <div class="slider-info"><span>1%</span><strong id="rate-display">4.0%</strong><span>10%</span></div>
+      <input type="range" id="rate-slider" min="1" max="10" step="0.1" value="4.0" oninput="syncRate();calc()">
+    </div>
+    <div class="irow">
+      <div class="irow-left">
+        <div class="irow-name">상환 기간 ⏳</div>
+        <div class="irow-hint warn">⚠️ 2026년 최대 30년으로 제한</div>
+      </div>
+      <div class="irow-right">
+        <select id="years" onchange="calc()">
+          <option value="10">10년</option><option value="15">15년</option>
+          <option value="20">20년</option><option value="25">25년</option>
+          <option value="30" selected>30년 (최대)</option>
+        </select>
+      </div>
+    </div>
+    <div class="irow" style="border-bottom:none;">
+      <div class="irow-left">
+        <div class="irow-name">거치 기간 💤</div>
+        <div class="irow-hint">이 기간엔 이자만 납부</div>
+      </div>
+      <div class="irow-right">
+        <select id="grace" onchange="calc()">
+          <option value="0" selected>없음</option>
+          <option value="1">1년</option><option value="2">2년</option><option value="3">3년</option>
+        </select>
+      </div>
+    </div>
+    <div class="stress-box" id="stress-info">스트레스 금리 계산 중...</div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="next-btn ghost" onclick="goStep(0)">← 이전</button>
+    <button class="next-btn" onclick="goStep(2)">다음 — 집 정보 입력하기 →</button>
+  </div>
+</div>
+
+<!-- ══ STEP 3: 집 정보 ══ -->
+<div class="step-panel" id="step-2">
+  <div class="section">
+    <div class="step-header">
+      <div class="step-q">🏡 어떤 집을<br>사고 싶으세요?</div>
+      <div class="step-desc">지역과 가격에 따라 대출 한도가 달라져요</div>
+    </div>
+    <div class="irow">
+      <div class="irow-left">
+        <div class="irow-name">주택 시세 🏷️</div>
+        <div class="irow-hint">매입 예정 주택 감정가</div>
+      </div>
+      <div class="irow-right" style="flex-direction:column;align-items:flex-end;gap:3px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <input type="number" id="housePrice" value="60000" step="1000" inputmode="numeric" oninput="calc()">
+          <span class="qunit">만원</span>
+        </div>
+        <span class="uk-text" id="house-uk"></span>
+      </div>
+    </div>
+    <div class="irow">
+      <div class="irow-left">
+        <div class="irow-name">지역 등급 📍</div>
+        <div class="irow-hint warn" id="region-hint">⚠️ 수도권: 스트레스 금리 +3%p, 한도 6억</div>
+      </div>
+      <div class="irow-right">
+        <select id="region" onchange="calc()">
+          <option value="metro_hot">🔴 투기과열지구</option>
+          <option value="metro_adj">🟠 조정대상지역</option>
+          <option value="general" selected>🟡 일반지역</option>
+          <option value="free">🟢 비규제지역</option>
+        </select>
+      </div>
+    </div>
+    <div class="irow">
+      <div class="irow-left">
+        <div class="irow-name">생애최초 주택 구입 🎖️</div>
+        <div class="irow-hint">LTV 최대 80% + 취득세 감면</div>
+      </div>
+      <div class="irow-right">
+        <div class="toggle-wrap">
+          <button class="toggle-btn" id="first-home-toggle" onclick="toggleFirstHome()" data-on="false">
+            <span class="toggle-knob"></span>
+          </button>
+          <span class="toggle-label" id="first-home-label">아님</span>
+        </div>
+      </div>
+    </div>
+    <div class="first-home-badge" id="first-home-badge">
+      🎖️ <b>생애최초 혜택 적용 중!</b><br>모든 지역 LTV <b>80%</b> · 수도권 <b>6억</b> 상한 동일 · 취득세 <b>200만원 감면</b>
+    </div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button class="next-btn ghost" onclick="goStep(1)">← 이전</button>
+    <button class="next-btn" onclick="goStep(3)">결과 보기 🎉</button>
+  </div>
+</div>
+
+<!-- ══ STEP 4: 결과 ══ -->
+<div class="summary-view" id="step-3">
+
+  <!-- 대시보드 -->
+  <div class="dashboard">
+    <div class="dash-main">
+      <div class="dash-item">
+        <div class="dash-label">최대 대출 가능액</div>
+        <div class="dash-val green" id="s-maxloan">—</div>
+        <div class="dash-sub" id="s-maxloan-sub">—</div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-label">월 상환액</div>
+        <div class="dash-val blue" id="s-monthly">—</div>
+        <div class="dash-sub">원리금균등</div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-label">총 이자</div>
+        <div class="dash-val red" id="s-interest">—</div>
+        <div class="dash-sub">전체 기간</div>
+      </div>
+      <div class="dash-item">
+        <div class="dash-label">연간 소득</div>
+        <div class="dash-val yellow" id="s-income">—</div>
+        <div class="dash-sub">세전 기준</div>
+      </div>
+    </div>
+    <!-- DSR vs LTV 한도 근거 -->
+    <div class="dash-limits" id="dash-limits-row">
+      <div class="dash-limit-item">
+        <span class="dash-limit-label">DSR 기준 한도</span>
+        <span class="dash-limit-val" id="d-dsr">—</span>
+      </div>
+      <div class="dash-limit-divider"></div>
+      <div class="dash-limit-item">
+        <span class="dash-limit-label">LTV 기준 한도</span>
+        <span class="dash-limit-val" id="d-ltv">—</span>
+      </div>
+      <div class="dash-limit-divider" id="d-cap-div" style="display:none"></div>
+      <div class="dash-limit-item" id="d-cap-item" style="display:none">
+        <span class="dash-limit-label">수도권 상한</span>
+        <span class="dash-limit-val" style="color:var(--red)">6억원</span>
+      </div>
+    </div>
+    <!-- 내가 준비해야 할 돈 -->
+    <div class="dash-mymoney">
+      <div class="dash-mymoney-label">💵 내가 준비해야 할 돈</div>
+      <div class="dash-mymoney-right">
+        <div class="dash-mymoney-calc">
+          <span class="hp" id="mm-house">—</span>
+          <span class="minus"> − </span>
+          <span class="loan" id="mm-loan">—</span>
+        </div>
+        <div class="dash-mymoney-result" id="mm-need">—</div>
+      </div>
+    </div>
+    <!-- DSR 게이지 -->
+    <div class="dash-dsr">
+      <div class="dsr-top">
+        <span class="dsr-title-sm">⚡ 스트레스 DSR 소진율</span>
+        <span class="dsr-pct" id="dsr-pct">—</span>
+      </div>
+      <div class="dsr-bar-bg"><div class="dsr-bar-fill" id="dsr-bar" style="width:0%"></div></div>
+      <div class="dsr-status" id="dsr-status">계산 중...</div>
+    </div>
+  </div>
+
+  <!-- 상환 방식 대결 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-icon">⚔️</span>
+      <span class="section-title">상환 방식 대결</span>
+      <span class="section-tag">VS</span>
+    </div>
+    <div class="versus">
+      <div class="battle blue" onclick="showRepayInfo('equal')">
+        <div class="battle-name">원리금균등 <span class="q-icon" onclick="event.stopPropagation();showRepayInfo('equal')">?</span></div>
+        <div class="battle-amt" id="r-monthly-a">—</div>
+        <div class="battle-sub">매월 동일</div>
+      </div>
+      <div class="battle green" onclick="showRepayInfo('principal')">
+        <div class="battle-name">원금균등 <span class="q-icon" onclick="event.stopPropagation();showRepayInfo('principal')">?</span></div>
+        <div class="battle-amt" id="r-monthly-b">—</div>
+        <div class="battle-sub">첫 달 기준</div>
+      </div>
+    </div>
+    <div class="stat-rows">
+      <div class="srow"><span class="sl">대출 원금</span><span class="sv yellow" id="r-principal">—</span></div>
+      <div class="srow"><span class="sl">원리금균등 총이자</span><span class="sv red" id="r-int-a">—</span></div>
+      <div class="srow"><span class="sl">원금균등 총이자</span><span class="sv red" id="r-int-b">—</span></div>
+      <div class="srow" style="border-bottom:none;"><span class="sl">첫 달 이자</span><span class="sv" id="r-first-int">—</span></div>
+    </div>
+    <div class="save-row"><span>💡</span><span id="save-text">—</span></div>
+  </div>
+
+  <!-- 부대비용 -->
+  <div class="section">
+    <div class="section-head">
+      <span class="section-icon">🧾</span>
+      <span class="section-title">이사 시 부대비용</span>
+      <span class="section-tag">EXTRA</span>
+    </div>
+    <div id="extra-rows"></div>
+    <div class="extra-total">
+      <div><div class="etl">💸 부대비용 합계</div><div class="ets">포함 항목 기준</div></div>
+      <div class="extra-total-val" id="extra-total">—</div>
+    </div>
+    <div class="extra-note">※ 취득세는 주택가격·생애최초·다주택 여부에 따라 달라집니다. 위 금액은 추산치입니다.</div>
+  </div>
+
+  <!-- 아코디언: 수치 수정하기 -->
+  <button class="accordion-btn" id="edit-toggle" onclick="toggleEdit()">
+    <span>✏️ 수치 수정하기</span>
+    <span class="accordion-arrow">▾</span>
+  </button>
+  <div class="accordion-body" id="edit-body">
+    <!-- 내 재정 정보 -->
+    <div class="section" style="border-radius:0;border:none;border-bottom:1px solid var(--border);">
+      <div class="section-head" style="border-radius:0;">
+        <span class="section-icon">💼</span>
+        <span class="section-title">내 재정 정보</span>
+        <span class="section-tag">수정 가능</span>
+      </div>
+      <div class="irow">
+        <div class="irow-left">
+          <div class="irow-name">연간 소득 💰</div>
+        </div>
+        <div class="irow-right" style="flex-direction:column;align-items:flex-end;gap:3px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input type="number" id="income2" value="5000" step="100" inputmode="numeric" oninput="sync('income','income2');calc()">
+            <span class="qunit">만원</span>
+          </div>
+          <span class="uk-text" id="income-uk2"></span>
+        </div>
+      </div>
+      <div class="irow" style="border-bottom:none;">
+        <div class="irow-left"><div class="irow-name">기존 부채 상환액 ⚠️</div></div>
+        <div class="irow-right">
+          <input type="number" id="existing2" value="0" step="10" inputmode="numeric" oninput="sync('existing','existing2');calc()">
+          <span class="qunit">만원</span>
+        </div>
+      </div>
+    </div>
+    <!-- 대출 조건 -->
+    <div class="section" style="border-radius:0;border:none;border-bottom:1px solid var(--border);">
+      <div class="section-head" style="border-radius:0;">
+        <span class="section-icon">🏦</span>
+        <span class="section-title">대출 조건</span>
+        <span class="section-tag">수정 가능</span>
+      </div>
+      <div class="irow">
+        <div class="irow-left"><div class="irow-name">금리 유형 📊</div></div>
+        <div class="irow-right">
+          <select id="rate-type2" onchange="syncSel('rate-type','rate-type2');calc()">
+            <option value="fixed">고정금리</option>
+            <option value="variable" selected>변동금리</option>
+          </select>
+        </div>
+      </div>
+      <div class="irow">
+        <div class="irow-left"><div class="irow-name">금리 (연) 🎯</div></div>
+        <div class="irow-right">
+          <input type="number" id="rate2" value="4.0" step="0.1" inputmode="decimal" oninput="sync('rate','rate2');syncSlider();calc()">
+          <span class="qunit">%</span>
+        </div>
+      </div>
+      <div class="irow">
+        <div class="irow-left"><div class="irow-name">상환 기간 ⏳</div></div>
+        <div class="irow-right">
+          <select id="years2" onchange="syncSel('years','years2');calc()">
+            <option value="10">10년</option><option value="15">15년</option>
+            <option value="20">20년</option><option value="25">25년</option>
+            <option value="30" selected>30년</option>
+          </select>
+        </div>
+      </div>
+      <div class="irow" style="border-bottom:none;">
+        <div class="irow-left"><div class="irow-name">거치 기간 💤</div></div>
+        <div class="irow-right">
+          <select id="grace2" onchange="syncSel('grace','grace2');calc()">
+            <option value="0" selected>없음</option>
+            <option value="1">1년</option><option value="2">2년</option><option value="3">3년</option>
+          </select>
+        </div>
+      </div>
+      <div class="stress-box" id="stress-info2">...</div>
+    </div>
+    <!-- 집 정보 -->
+    <div class="section" style="border-radius:0;border:none;">
+      <div class="section-head" style="border-radius:0;">
+        <span class="section-icon">🏡</span>
+        <span class="section-title">집 정보</span>
+        <span class="section-tag">수정 가능</span>
+      </div>
+      <div class="irow">
+        <div class="irow-left"><div class="irow-name">주택 시세 🏷️</div></div>
+        <div class="irow-right" style="flex-direction:column;align-items:flex-end;gap:3px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <input type="number" id="housePrice2" value="60000" step="1000" inputmode="numeric" oninput="sync('housePrice','housePrice2');calc()">
+            <span class="qunit">만원</span>
+          </div>
+          <span class="uk-text" id="house-uk2"></span>
+        </div>
+      </div>
+      <div class="irow">
+        <div class="irow-left">
+          <div class="irow-name">지역 등급 📍</div>
+          <div class="irow-hint" id="region-hint2"></div>
+        </div>
+        <div class="irow-right">
+          <select id="region2" onchange="syncSel('region','region2');calc()">
+            <option value="metro_hot">🔴 투기과열지구</option>
+            <option value="metro_adj">🟠 조정대상지역</option>
+            <option value="general" selected>🟡 일반지역</option>
+            <option value="free">🟢 비규제지역</option>
+          </select>
+        </div>
+      </div>
+      <div class="irow" style="border-bottom:none;">
+        <div class="irow-left"><div class="irow-name">생애최초 주택 구입 🎖️</div></div>
+        <div class="irow-right">
+          <div class="toggle-wrap">
+            <button class="toggle-btn" id="first-home-toggle2" onclick="toggleFirstHome()" data-on="false">
+              <span class="toggle-knob"></span>
+            </button>
+            <span class="toggle-label" id="first-home-label2">아님</span>
+          </div>
+        </div>
+      </div>
+      <div class="first-home-badge" id="first-home-badge2">
+        🎖️ <b>생애최초 혜택 적용 중!</b><br>모든 지역 LTV <b>80%</b> · 수도권 <b>6억</b> 상한 동일 · 취득세 <b>200만원 감면</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule-box" style="margin-top:12px;">
+    <div class="rule-box-icon">📋</div>
+    <div class="rule-box-text">
+      <b>2026년 주요 변경</b> · 변동금리 스트레스 금리 가산 (수도권 <b>+3%p</b>/일반 <b>+1.5%p</b>) · 수도권 주담대 한도 <b>최대 6억</b> · 최대 만기 <b>30년</b>
+    </div>
+  </div>
+
+  <button class="next-btn ghost" onclick="goStep(0)" style="margin-top:8px;">← 처음부터 다시 입력</button>
+</div>
+
+</div><!-- /page -->
+
+<div class="disclaimer">
+  ※ 2026년 3월 기준 참고용. 실제 대출 가능액 및 비용은 금융기관 심사와 계약 조건에 따라 다를 수 있습니다.
+</div>
+
+<script>
+function comma(n){return Math.round(n).toLocaleString('ko-KR');}
+function fmt(n){return comma(n)+'원';}
+function fmtM(n){return Math.round(n/10000)>=10000?(n/100000000).toFixed(1)+'억':Math.round(n/10000)+'만';}
+function fmtFull(n){return n>=100000000?(n/100000000).toFixed(1)+'억원':Math.round(n/10000)+'만원';}
+
+/* 스텝 */
+let currentStep=0;
+function goStep(n){
+  for(let i=0;i<3;i++) document.getElementById('step-'+i).classList.remove('active');
+  document.getElementById('step-3').classList.remove('active');
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('dot-'+i);
+    d.classList.remove('active','done');
+    if(i<n) d.classList.add('done');
+    else if(i===n) d.classList.add('active');
+  }
+  for(let i=0;i<3;i++) document.getElementById('line-'+i).classList.toggle('done',i<n);
+  currentStep=n;
+  if(n<3) document.getElementById('step-'+n).classList.add('active');
+  else {
+    syncAllToEdit();
+    document.getElementById('step-3').classList.add('active');
+    calc();
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function syncAllToEdit(){
+  ['income','existing','rate','housePrice'].forEach(id=>{
+    const el=document.getElementById(id+'2');
+    if(el) el.value=document.getElementById(id).value;
+  });
+  ['rate-type','years','grace','region'].forEach(id=>{
+    const el=document.getElementById(id+'2');
+    if(el) el.value=document.getElementById(id).value;
+  });
+}
+
+function sync(id1,id2){
+  const src=event.target.id===id1?id1:id2;
+  const dst=src===id1?id2:id1;
+  const el=document.getElementById(dst);
+  if(el) el.value=document.getElementById(src).value;
+}
+function syncSel(id1,id2){
+  const src=event.target.id===id1?id1:id2;
+  const dst=src===id1?id2:id1;
+  const el=document.getElementById(dst);
+  if(el) el.value=document.getElementById(src).value;
+}
+
+function syncSlider(){
+  const v=parseFloat(document.getElementById('rate').value)||4.0;
+  document.getElementById('rate-slider').value=Math.min(10,Math.max(1,v));
+  document.getElementById('rate-display').textContent=v.toFixed(1)+'%';
+}
+function syncRate(){
+  const v=parseFloat(document.getElementById('rate-slider').value);
+  document.getElementById('rate').value=v.toFixed(1);
+  const r2=document.getElementById('rate2');
+  if(r2) r2.value=v.toFixed(1);
+  document.getElementById('rate-display').textContent=v.toFixed(1)+'%';
+}
+
+let firstHome=false;
+function toggleFirstHome(){
+  firstHome=!firstHome;
+  ['first-home-toggle','first-home-toggle2'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.setAttribute('data-on',firstHome);
+  });
+  ['first-home-label','first-home-label2'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=firstHome?'해당!':'아님';
+  });
+  ['first-home-badge','first-home-badge2'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.className='first-home-badge'+(firstHome?' show':'');
+  });
+  calc();
+}
+
+function toggleEdit(){
+  const btn=document.getElementById('edit-toggle');
+  const body=document.getElementById('edit-body');
+  btn.classList.toggle('open');
+  body.classList.toggle('open');
+  btn.querySelector('.accordion-arrow').classList.toggle('open');
+}
+
+function calcEq(p,annR,m){
+  const r=annR/12/100;
+  if(r===0) return p/m;
+  return p*r*Math.pow(1+r,m)/(Math.pow(1+r,m)-1);
+}
+function maxByDSR(inc,ex,sr,m,lim){
+  const maxAnn=inc*lim-ex;
+  if(maxAnn<=0) return 0;
+  const r=sr/12/100,mo=maxAnn/12;
+  if(r===0) return mo*m;
+  return mo*(Math.pow(1+r,m)-1)/(r*Math.pow(1+r,m));
+}
+
+function getVal(id){
+  const el2=document.getElementById(id+'2');
+  const el=document.getElementById(id);
+  const src=(currentStep===3&&el2)?el2:el;
+  return parseFloat(src?src.value:0)||0;
+}
+function getSel(id){
+  const el2=document.getElementById(id+'2');
+  const el=document.getElementById(id);
+  const src=(currentStep===3&&el2)?el2:el;
+  return src?src.value:'';
+}
+
+if(!window.extraChecked) window.extraChecked={'ex-mov':true,'ex-rep':true};
+
+function renderExtra(aqRate,aqFinal,eduTax,ruralTax,agRate,agFee,regFee,movFee,repFee){
+  const required=[
+    {id:'ex-acq', icon:'🏛️',name:'취득세',         desc:firstHome?'생애최초 200만원 감면':`${(aqRate*100).toFixed(1)}% 적용`, val:aqFinal,       basis:`교육세 +${fmtFull(eduTax)} 별도`},
+    {id:'ex-edu', icon:'📚',name:'지방교육세+농특세',desc:'취득세 납부 시 함께',                                              val:eduTax+ruralTax,basis:'취득세액 기준'},
+    {id:'ex-agt', icon:'🤝',name:'중개보수',         desc:'법정 상한 요율 기준',                                             val:agFee,          basis:`요율 ${(agRate*100).toFixed(2)}%`},
+    {id:'ex-reg', icon:'📝',name:'등기비용',         desc:'소유권 이전 등기',                                                val:regFee,         basis:'법무사 수수료 포함'},
+  ];
+  const optional=[
+    {id:'ex-mov',icon:'🚚',name:'이사비',       desc:'포장이사 추산',    val:movFee,basis:'규모·거리에 따라 상이'},
+    {id:'ex-rep',icon:'🔨',name:'인테리어·수리',desc:'도배·장판 등 추산',val:repFee,basis:'시세의 약 1%'},
+  ];
+  let total=required.reduce((s,i)=>s+i.val,0);
+  optional.forEach(i=>{if(window.extraChecked[i.id]) total+=i.val;});
+
+  const all=[...required,...optional];
+  document.getElementById('extra-rows').innerHTML=all.map(it=>{
+    const isOpt=optional.some(o=>o.id===it.id);
+    const checked=!isOpt||window.extraChecked[it.id];
+    return `<div class="extra-row"${isOpt&&!checked?' style="opacity:0.38"':''}>
+      <div class="extra-row-left">
+        <span class="extra-icon-sm">${it.icon}</span>
+        <div>
+          <div class="extra-name">${it.name}${isOpt?'<span class="opt-tag">선택</span>':''}</div>
+          <div class="extra-desc">${it.desc} · ${it.basis}</div>
+        </div>
+      </div>
+      <div class="extra-row-right">
+        <div class="extra-val">${fmtFull(it.val)}</div>
+        ${isOpt?`<label class="ex-toggle"><input type="checkbox" ${checked?'checked':''} onchange="window.extraChecked['${it.id}']=this.checked;window._renderExtra()"><span class="ex-knob"></span></label>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('extra-total').textContent=fmtFull(total);
+}
+
+function calc(){
+  const income    =(getVal('income')    )*10000;
+  const existing  =(getVal('existing')  )*10000;
+  const housePrice=(getVal('housePrice'))*10000;
+  const region    =getSel('region');
+  const rateType  =getSel('rate-type');
+  const rate      =getVal('rate')||4.0;
+  const years     =parseInt(getSel('years'))||30;
+  const grace     =parseInt(getSel('grace'))||0;
+
+  document.getElementById('rate-display').textContent=rate.toFixed(1)+'%';
+  document.getElementById('rate-slider').value=Math.min(10,rate);
+
+  // 억 단위 힌트
+  ['income-uk','income-uk2'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.style.display=income>=100000000?'block':'none';
+    if(income>=100000000) el.textContent=(income/100000000).toFixed(1)+'억';
+  });
+  ['house-uk','house-uk2'].forEach(id=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.style.display=housePrice>=100000000?'block':'none';
+    if(housePrice>=100000000) el.textContent=(housePrice/100000000).toFixed(1)+'억';
+  });
+
+  // 지역 → 파라미터
+  const rMap={
+    metro_hot:{dsrLimit:0.40,baseLtv:0.40,isMet:true, stressAdd:3.0},
+    metro_adj:{dsrLimit:0.40,baseLtv:0.50,isMet:true, stressAdd:3.0},
+    general:  {dsrLimit:0.50,baseLtv:0.70,isMet:false,stressAdd:1.5},
+    free:     {dsrLimit:0.50,baseLtv:0.80,isMet:false,stressAdd:1.5},
+  };
+  const rg=rMap[region]||rMap['general'];
+  const{dsrLimit,baseLtv,isMet}=rg;
+
+  // 지역 힌트
+  const hintText=isMet?'⚠️ 수도권: 스트레스 금리 +3%p, 한도 6억':'일반·비규제: DSR 50%, 스트레스 금리 +1.5%p';
+  const hintClass='irow-hint'+(isMet?' warn':'');
+  ['region-hint','region-hint2'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.textContent=hintText;el.className=hintClass;}
+  });
+
+  const stressAdd =rateType==='variable'?rg.stressAdd:0;
+  const stressRate=rate+stressAdd;
+  const ltvRatio  =firstHome?Math.max(baseLtv,0.8):baseLtv;
+  const months    =(years-grace)*12;
+  const r         =rate/12/100;
+
+  const dsrMax  =maxByDSR(income,existing,stressRate,months,dsrLimit);
+  const ltvMax  =housePrice*ltvRatio;
+  const capLimit=isMet?600000000:Infinity;
+  const maxLoan =Math.min(dsrMax,ltvMax,capLimit);
+  const principal=maxLoan;
+
+  let constraintBy='DSR';
+  if(ltvMax<=dsrMax&&ltvMax<=capLimit) constraintBy='LTV';
+  if(capLimit<dsrMax&&capLimit<ltvMax) constraintBy='CAP';
+
+  const monthlyA     =calcEq(principal,rate,months);
+  const monthlyPrin  =principal/months;
+  const monthlyBFirst=monthlyPrin+principal*r;
+  const totalA=monthlyA*months;
+  const intA  =totalA-principal;
+  let intB=0;
+  for(let i=0;i<months;i++) intB+=(principal-monthlyPrin*i)*r;
+  const intDiff=intA-intB;
+
+  const stressMo=calcEq(principal,stressRate,months);
+  const annRepay=stressMo*12+existing;
+  const dsrUsed =income>0?annRepay/income*100:0;
+
+  // 스트레스 안내 (스텝2에도 표시)
+  const sHTML=rateType==='variable'
+    ?`📊 스트레스 DSR · 실제 금리 <b>${rate.toFixed(1)}%</b> + 스트레스 <b>+${stressAdd.toFixed(1)}%p</b> = 심사 금리 <b>${stressRate.toFixed(1)}%</b>`
+    :`✅ 고정금리 — 스트레스 금리 미적용 · <b>${rate.toFixed(1)}%</b> 그대로 심사`;
+  ['stress-info','stress-info2'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.innerHTML=sHTML;
+  });
+
+  // 결과 화면(step-3)에서만 업데이트
+  if (currentStep === 3) {
+    // 대시보드
+    document.getElementById('s-income').textContent  =fmtM(income);
+    document.getElementById('s-maxloan').textContent =fmtM(maxLoan);
+    document.getElementById('s-monthly').textContent =fmtM(monthlyA);
+    document.getElementById('s-interest').textContent=fmtM(intA);
+
+    // 한도 근거
+    const subLabels={DSR:'DSR 한도로 제한됨',LTV:'LTV 한도로 제한됨',CAP:'수도권 6억 상한 적용'};
+    document.getElementById('s-maxloan-sub').textContent=subLabels[constraintBy]||'';
+    document.getElementById('d-dsr').textContent=fmtFull(dsrMax);
+    document.getElementById('d-ltv').textContent=fmtFull(ltvMax);
+    document.getElementById('d-dsr').className='dash-limit-val'+(constraintBy==='DSR'?' active':'');
+    document.getElementById('d-ltv').className='dash-limit-val'+(constraintBy==='LTV'?' active':'');
+    document.getElementById('d-cap-item').style.display=isMet?'block':'none';
+    document.getElementById('d-cap-div').style.display =isMet?'block':'none';
+
+    // 내가 준비해야 할 돈
+    document.getElementById('mm-house').textContent=fmtM(housePrice);
+    document.getElementById('mm-loan').textContent =fmtM(maxLoan);
+    document.getElementById('mm-need').textContent =fmtFull(Math.max(0,housePrice-maxLoan));
+
+    // DSR 게이지
+    const bar=document.getElementById('dsr-bar');
+    bar.style.width=Math.min(dsrUsed,100)+'%';
+    if(dsrUsed>dsrLimit*100){
+      bar.style.background='var(--red)';
+      document.getElementById('dsr-status').textContent='🚨 DSR 한도 초과! 대출이 제한됩니다';
+    } else if(dsrUsed>dsrLimit*100*0.85){
+      bar.style.background='var(--orange)';
+      document.getElementById('dsr-status').textContent='⚠️ 한도에 근접했습니다';
+    } else {
+      bar.style.background='linear-gradient(90deg,var(--blue),var(--green))';
+      document.getElementById('dsr-status').textContent='✅ 양호 · 여유 있는 범위';
+    }
+    document.getElementById('dsr-pct').textContent=dsrUsed.toFixed(1)+'% / 한도 '+(dsrLimit*100)+'%';
+
+    // 상환 비교
+    document.getElementById('r-monthly-a').textContent=fmtM(monthlyA)+'/월';
+    document.getElementById('r-monthly-b').textContent=fmtM(monthlyBFirst)+'/월';
+    document.getElementById('r-principal').textContent=fmt(principal);
+    document.getElementById('r-int-a').textContent=fmt(intA);
+    document.getElementById('r-int-b').textContent=fmt(intB);
+    document.getElementById('r-first-int').textContent=fmt(principal*r);
+    document.getElementById('save-text').innerHTML=`원금균등이 총이자 <b>${fmtM(intDiff)}</b> 절감! 단, 초기 월납입액이 더 높아요.`;
+
+    // 부대비용
+    let aqRate;
+    if(firstHome&&housePrice<=1200000000){aqRate=housePrice<=850000000?0.01:0.02;}
+    else if(housePrice<=60000000)aqRate=0.01;
+    else if(housePrice<=900000000)aqRate=0.01+(housePrice-60000000)/(900000000-60000000)*0.02;
+    else if(housePrice<=1200000000)aqRate=0.03;
+    else aqRate=0.04;
+    const aqTax=housePrice*aqRate;
+    const aqFinal=(firstHome&&housePrice<=1200000000)?Math.max(0,aqTax-2000000):aqTax;
+    const eduTax=aqFinal*0.1,ruralTax=aqFinal*0.2;
+    let agRate;
+    if(housePrice<50000000)agRate=0.006;
+    else if(housePrice<200000000)agRate=0.005;
+    else if(housePrice<900000000)agRate=0.004;
+    else agRate=0.005;
+    const agFee=Math.min(housePrice*agRate,housePrice<200000000?800000:housePrice<900000000?3000000:9000000);
+    const regFee=Math.min(housePrice*0.002,1500000)+200000;
+    const movFee=housePrice<300000000?800000:housePrice<600000000?1200000:1800000;
+    const repFee=housePrice*0.01;
+    window._renderExtra=()=>renderExtra(aqRate,aqFinal,eduTax,ruralTax,agRate,agFee,regFee,movFee,repFee);
+    window._renderExtra();
+  }
+}
+
+calc();
+
+function showDebtInfo() {
+  document.getElementById('sheet-emoji').textContent = '💡';
+  document.getElementById('sheet-title').textContent = '기존 부채 상환액이란?';
+  const tag = document.getElementById('sheet-tag');
+  tag.textContent = '이 주담대 외 모든 대출의 연간 원리금';
+  tag.className = 'sheet-tag blue';
+  document.getElementById('sheet-desc').textContent =
+    '현재 갚고 있는 모든 대출의 원금 + 이자를 1년치로 합산한 금액이에요. DSR 계산에 포함되어 대출 한도에 영향을 줍니다.';
+  document.getElementById('sheet-pros').innerHTML = [
+    { icon:'🚗', text:'자동차 할부 — 월 납입액 × 12' },
+    { icon:'💳', text:'신용대출 월 원리금 × 12' },
+    { icon:'🏠', text:'기존 전세자금대출 원리금' },
+    { icon:'📱', text:'핸드폰 할부 — 월 납입액 × 12' },
+    { icon:'🎓', text:'학자금대출 상환액' },
+    { icon:'✅', text:'없으면 0 그대로 두세요!' },
+  ].map(p=>`<div class="sheet-pro"><span class="sheet-pro-icon">${p.icon}</span><span>${p.text}</span></div>`).join('');
+  document.getElementById('sheet-backdrop').classList.add('show');
+  document.getElementById('repay-sheet').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function showRepayInfo(type) {
+  const data = {
+    equal: {
+      emoji: '📅', title: '원리금균등이란?',
+      tagText: '💙 매월 같은 금액 납부', tagClass: 'blue',
+      desc: '매달 납부하는 금액(원금 + 이자)이 처음부터 끝까지 동일합니다. 생활비 계획 세우기가 쉽고 예측 가능해서 가장 많이 쓰는 방식이에요.',
+      pros: [
+        { icon:'✅', text:'매월 납부액이 고정 → 가계 예산 짜기 쉬움' },
+        { icon:'✅', text:'초기 부담이 원금균등보다 낮음' },
+        { icon:'⚠️', text:'총 이자 납부액이 원금균등보다 많음' },
+        { icon:'⚠️', text:'초반엔 이자 비중이 크고 원금 상환이 느림' },
+      ],
+    },
+    principal: {
+      emoji: '📉', title: '원금균등이란?',
+      tagText: '💚 시간이 갈수록 납부액 감소', tagClass: 'green',
+      desc: '매달 갚는 원금은 동일하고, 이자는 남은 원금에 비례해서 줄어들어요. 처음엔 많이 내지만 갈수록 부담이 줄어듭니다.',
+      pros: [
+        { icon:'✅', text:'총 이자 납부액이 원리금균등보다 적음' },
+        { icon:'✅', text:'시간이 갈수록 월 납부액이 감소' },
+        { icon:'⚠️', text:'초기 월 납부액이 원리금균등보다 높음' },
+        { icon:'⚠️', text:'초반 수년간 가계 부담이 클 수 있음' },
+      ],
+    },
+  };
+  const d = data[type];
+  document.getElementById('sheet-emoji').textContent = d.emoji;
+  document.getElementById('sheet-title').textContent = d.title;
+  const tag = document.getElementById('sheet-tag');
+  tag.textContent = d.tagText;
+  tag.className = 'sheet-tag ' + d.tagClass;
+  document.getElementById('sheet-desc').textContent = d.desc;
+  document.getElementById('sheet-pros').innerHTML = d.pros
+    .map(p=>`<div class="sheet-pro"><span class="sheet-pro-icon">${p.icon}</span><span>${p.text}</span></div>`)
+    .join('');
+  document.getElementById('sheet-backdrop').classList.add('show');
+  document.getElementById('repay-sheet').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSheet() {
+  document.getElementById('sheet-backdrop').classList.remove('show');
+  document.getElementById('repay-sheet').classList.remove('show');
+  document.body.style.overflow = '';
+}
+</script>
+<div class="sheet-backdrop" id="sheet-backdrop" onclick="closeSheet()"></div>
+
+<!-- 상환 방식 설명 바텀시트 -->
+<div class="sheet" id="repay-sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <span class="sheet-emoji" id="sheet-emoji">💰</span>
+    <span class="sheet-title" id="sheet-title">원리금균등이란?</span>
+  </div>
+  <div class="sheet-body">
+    <span class="sheet-tag" id="sheet-tag">추천 대상</span>
+    <div class="sheet-desc" id="sheet-desc"></div>
+    <div class="sheet-pros" id="sheet-pros"></div>
+  </div>
+  <button class="sheet-close" onclick="closeSheet()">닫기</button>
+</div>
+
+</body>
+</html>
