@@ -372,7 +372,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
       <div class="irow-right" style="flex-direction:column;align-items:flex-end;gap:3px;">
         <div style="display:flex;align-items:center;gap:6px;">
           <input type="number" id="income" value="5000" step="100" inputmode="numeric" oninput="calc()">
-          <span class="qunit">만원</span>
+          <span class="qunit" style="min-width:36px;text-align:left;">만원</span>
         </div>
         <span class="uk-text" id="income-uk"></span>
       </div>
@@ -388,9 +388,9 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
       <div class="irow-right" style="flex-direction:column;align-items:flex-end;gap:3px;">
         <div style="display:flex;align-items:center;gap:6px;">
           <input type="number" id="existing" value="0" step="5" inputmode="numeric" oninput="calc()">
-          <span class="qunit">만원/월</span>
+          <span class="qunit" style="min-width:36px;text-align:left;">만원/월</span>
         </div>
-        <span class="uk-text" id="existing-annual" style="color:var(--muted);">연 0만원으로 계산</span>
+        <span class="uk-text" id="existing-annual" style="color:var(--muted);display:block;visibility:hidden;">연 0만원으로 계산</span>
       </div>
     </div>
     <div class="irow" style="border-bottom:none;">
@@ -401,7 +401,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
       <div class="irow-right" style="flex-direction:column;align-items:flex-end;gap:3px;">
         <div style="display:flex;align-items:center;gap:6px;">
           <input type="number" id="savings" value="0" step="100" inputmode="numeric" oninput="calc()">
-          <span class="qunit">만원</span>
+          <span class="qunit" style="min-width:36px;text-align:left;">만원</span>
         </div>
         <span class="uk-text" id="savings-uk"></span>
       </div>
@@ -423,7 +423,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
         <div class="irow-hint">변동금리는 스트레스 금리 추가 적용</div>
       </div>
       <div class="irow-right">
-        <select id="rate-type" onchange="calc()">
+        <select id="rate-type" onchange="calc()" style="width:148px;">
           <option value="fixed">고정금리</option>
           <option value="variable" selected>변동금리</option>
         </select>
@@ -435,7 +435,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
         <div class="irow-hint">2026년 기준 약 3.5~6%대</div>
       </div>
       <div class="irow-right">
-        <input type="number" id="rate" value="4.0" step="0.1" min="0.1" max="20" inputmode="decimal" oninput="syncSlider();calc()">
+        <input type="number" id="rate" value="4.0" step="0.1" min="0.1" max="20" inputmode="decimal" style="width:110px;" oninput="syncSlider();calc()">
         <span class="qunit">%</span>
       </div>
     </div>
@@ -449,7 +449,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
         <div class="irow-hint warn">⚠️ 2026년 최대 30년으로 제한</div>
       </div>
       <div class="irow-right">
-        <select id="years" onchange="calc()">
+        <select id="years" onchange="calc()" style="width:148px;">
           <option value="10">10년</option><option value="15">15년</option>
           <option value="20">20년</option><option value="25">25년</option>
           <option value="30" selected>30년 (최대)</option>
@@ -462,7 +462,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
         <div class="irow-hint">이 기간엔 이자만 납부</div>
       </div>
       <div class="irow-right">
-        <select id="grace" onchange="calc()">
+        <select id="grace" onchange="calc()" style="width:148px;">
           <option value="0" selected>없음</option>
           <option value="1">1년</option><option value="2">2년</option><option value="3">3년</option>
         </select>
@@ -490,8 +490,8 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
       </div>
       <div class="irow-right" style="flex-direction:column;align-items:flex-end;gap:3px;">
         <div style="display:flex;align-items:center;gap:6px;">
-          <input type="number" id="housePrice" value="60000" step="1000" inputmode="numeric" oninput="calc()">
-          <span class="qunit">만원</span>
+          <input type="number" id="housePrice" value="60000" step="1000" inputmode="numeric" style="width:110px;" oninput="calc()">
+          <span class="qunit" style="min-width:36px;text-align:left;">만원</span>
         </div>
         <span class="uk-text" id="house-uk"></span>
       </div>
@@ -502,7 +502,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
         <div class="irow-hint warn" id="region-hint">⚠️ 수도권: 스트레스 금리 +3%p, 한도 6억</div>
       </div>
       <div class="irow-right">
-        <select id="region" onchange="calc()">
+        <select id="region" onchange="calc()" style="width:148px;">
           <option value="metro_hot">🔴 투기과열지구</option>
           <option value="metro_adj">🟠 조정대상지역</option>
           <option value="general" selected>🟡 일반지역</option>
@@ -1007,7 +1007,7 @@ function calc(){
   // 연간 환산 표시
   const annualEl = document.getElementById('existing-annual');
   if(annualEl){
-    annualEl.style.display = 'block';
+    annualEl.style.visibility = 'visible';
     annualEl.textContent = existingMo > 0
       ? `연 ${Math.round(existing/10000)}만원으로 계산`
       : '연 0만원으로 계산';
