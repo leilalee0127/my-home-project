@@ -270,6 +270,21 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
 .sheet-emoji{font-size:22px;}
 .sheet-title{font-family:'Jua',sans-serif;font-size:18px;color:var(--yellow);}
 .sheet-body{padding:0 20px 8px;}
+.region-table{width:100%;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:4px;}
+.rt-head{display:grid;grid-template-columns:1.4fr 0.7fr 0.7fr 1fr;background:var(--bg2);border-bottom:1px solid var(--border);}
+.rt-row{display:grid;grid-template-columns:1.4fr 0.7fr 0.7fr 1fr;border-bottom:1px solid var(--border);}
+.rt-row:last-child{border-bottom:none;}
+.rt-cell{padding:8px 10px;font-size:11px;color:var(--muted);display:flex;align-items:center;}
+.rt-head .rt-cell{font-size:10px;font-weight:700;letter-spacing:0.3px;}
+.rt-cell.mono{font-family:'DM Mono',monospace;font-size:12px;color:var(--text);}
+.rt-cell.red{color:var(--red);}
+.rt-cell.green{color:var(--green);}
+.rt-badge{font-size:10px;padding:2px 6px;border-radius:4px;white-space:nowrap;}
+.rt-badge.red{background:rgba(248,113,113,0.15);color:var(--red);}
+.rt-badge.orange{background:rgba(251,146,60,0.15);color:var(--orange);}
+.rt-badge.yellow{background:rgba(247,201,72,0.15);color:var(--yellow);}
+.rt-badge.green{background:rgba(52,211,153,0.15);color:var(--green);}
+
 .sheet-calc-box{margin-top:12px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
 .sheet-calc-title{font-size:11px;color:var(--muted);letter-spacing:0.5px;margin-bottom:10px;}
 .sheet-calc-row{display:flex;justify-content:space-between;align-items:center;}
@@ -327,7 +342,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
   <div class="header-title">🏠 내집마련 계산기</div>
   <div class="badge-row">
     <span class="badge red">🔴 스트레스 DSR 3단계</span>
-    <span class="badge warn">⚠️ 수도권 대출 6억 상한</span>
+    <span class="badge warn">⚠️ 수도권 단계별 대출 상한</span>
     <span class="badge info">📅 2026년 3월</span>
   </div>
   <div class="step-nav">
@@ -498,15 +513,15 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
     </div>
     <div class="irow">
       <div class="irow-left">
-        <div class="irow-name">지역 등급 📍</div>
+        <div class="irow-name">지역 등급 📍 <span class="q-icon" onclick="showRegionInfo()">?</span></div>
         <div class="irow-hint warn" id="region-hint">⚠️ 수도권: 스트레스 금리 +3%p, 한도 6억</div>
       </div>
       <div class="irow-right">
         <select id="region" onchange="calc()" style="width:148px;">
           <option value="metro_hot">🔴 투기과열지구</option>
           <option value="metro_adj">🟠 조정대상지역</option>
-          <option value="general" selected>🟡 일반지역</option>
-          <option value="free">🟢 비규제지역</option>
+          <option value="general" selected>🟡 일반지역 (LTV 70%)</option>
+          <option value="free">🟢 비규제지역 (LTV 80%)</option>
         </select>
       </div>
     </div>
@@ -578,9 +593,9 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
         <span class="dash-limit-val" style="color:var(--red)">6억원</span>
       </div>
     </div>
-    <!-- 15억 초과 불가 경고 -->
-    <div id="ban-warn" style="display:none;margin:0;padding:10px 18px;background:rgba(248,113,113,0.1);border-top:1px solid rgba(248,113,113,0.2);">
-      <span style="font-size:12px;color:var(--red);">🚫 수도권·규제지역 <b>15억 초과</b> 주택은 주담대 자체가 불가합니다</span>
+    <!-- 수도권 주담대 한도 안내 -->
+    <div id="ban-warn" style="display:none;margin:0;padding:10px 18px;background:rgba(248,113,113,0.08);border-top:1px solid rgba(248,113,113,0.2);">
+      <span style="font-size:12px;color:var(--red);" id="ban-warn-text"></span>
     </div>
     <!-- 실제 대출 필요액 -->
     <div class="dash-mymoney">
@@ -759,8 +774,8 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
           <select id="region2" onchange="syncSel('region','region2');calc()">
             <option value="metro_hot">🔴 투기과열지구</option>
             <option value="metro_adj">🟠 조정대상지역</option>
-            <option value="general" selected>🟡 일반지역</option>
-            <option value="free">🟢 비규제지역</option>
+            <option value="general" selected>🟡 일반지역 (LTV 70%)</option>
+            <option value="free">🟢 비규제지역 (LTV 80%)</option>
           </select>
         </div>
       </div>
@@ -784,7 +799,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
   <div class="rule-box" style="margin-top:12px;">
     <div class="rule-box-icon">📋</div>
     <div class="rule-box-text">
-      <b>2026년 주요 변경</b> · 변동금리 스트레스 금리 가산 (수도권 <b>+3%p</b>/일반 <b>+1.5%p</b>) · 수도권 대출금액 상한 <b>6억</b> · 15억 초과 주담대 <b>불가</b> · 최대 만기 <b>30년</b>
+      <b>2026년 주요 변경</b> · 변동금리 스트레스 금리 가산 (수도권 <b>+3%p</b>/일반 <b>+1.5%p</b>) · 수도권 대출 상한 <b>~15억 6억 / ~25억 4억 / 25억초과 2억</b> · 최대 만기 <b>30년</b>
     </div>
   </div>
 
@@ -863,27 +878,35 @@ function resetAll() {
 }
 
 function syncAllToEdit(){
+  // 원본 값을 _vals에 저장 (DOM 숨김 여부와 무관하게 보존)
   ['income','existing','savings','rate','housePrice'].forEach(id=>{
-    const el=document.getElementById(id+'2');
-    if(el) el.value=document.getElementById(id).value;
+    window._vals[id]=parseFloat(document.getElementById(id).value)||0;
+    const el2=document.getElementById(id+'2');
+    if(el2) el2.value=document.getElementById(id).value;
   });
   ['rate-type','years','grace','region'].forEach(id=>{
-    const el=document.getElementById(id+'2');
-    if(el) el.value=document.getElementById(id).value;
+    window._vals[id]=document.getElementById(id).value;
+    const el2=document.getElementById(id+'2');
+    if(el2) el2.value=document.getElementById(id).value;
   });
 }
 
 function sync(id1,id2){
   const src=event.target.id===id1?id1:id2;
   const dst=src===id1?id2:id1;
+  const val=document.getElementById(src).value;
   const el=document.getElementById(dst);
-  if(el) el.value=document.getElementById(src).value;
+  if(el) el.value=val;
+  // _vals 업데이트 (id1이 원본 key)
+  window._vals[id1]=parseFloat(val)||0;
 }
 function syncSel(id1,id2){
   const src=event.target.id===id1?id1:id2;
   const dst=src===id1?id2:id1;
+  const val=document.getElementById(src).value;
   const el=document.getElementById(dst);
-  if(el) el.value=document.getElementById(src).value;
+  if(el) el.value=val;
+  window._vals[id1]=val;
 }
 
 function syncSlider(){
@@ -938,17 +961,18 @@ function maxByDSR(inc,ex,sr,m,lim){
   return mo*(Math.pow(1+r,m)-1)/(r*Math.pow(1+r,m));
 }
 
+// 선택값 저장소 — DOM 숨김 여부와 무관하게 값 보존
+window._vals = {};
+
 function getVal(id){
-  const el2=document.getElementById(id+'2');
+  if(currentStep===3 && window._vals[id]!==undefined) return window._vals[id];
   const el=document.getElementById(id);
-  const src=(currentStep===3&&el2)?el2:el;
-  return parseFloat(src?src.value:0)||0;
+  return parseFloat(el?el.value:0)||0;
 }
 function getSel(id){
-  const el2=document.getElementById(id+'2');
+  if(currentStep===3 && window._vals[id]!==undefined) return window._vals[id];
   const el=document.getElementById(id);
-  const src=(currentStep===3&&el2)?el2:el;
-  return src?src.value:'';
+  return el?el.value:'';
 }
 
 if(!window.extraChecked) window.extraChecked={'ex-mov':true,'ex-rep':true};
@@ -1085,7 +1109,7 @@ function calc(){
   const{dsrLimit,baseLtv,isMet}=rg;
 
   // 지역 힌트
-  const hintText=isMet?'⚠️ 수도권: 스트레스 금리 +3%p · 대출금액 상한 6억 · 15억 초과 주담대 불가':'일반·비규제: DSR 50%, 스트레스 금리 +1.5%p';
+  const hintText=isMet?'⚠️ 수도권·규제지역 — 대출 상한·스트레스 금리 적용':'비수도권 — 대출 상한 없음 · DSR 50%';
   const hintClass='irow-hint'+(isMet?' warn':'');
   ['region-hint','region-hint2'].forEach(id=>{
     const el=document.getElementById(id);
@@ -1100,16 +1124,20 @@ function calc(){
 
   const dsrMax  =maxByDSR(income,existing,stressRate,months,dsrLimit);
   const ltvMax  =housePrice*ltvRatio;
-  // 수도권: 15억 초과 주담대 불가, 이하는 대출금액 6억 상한
-  const isBanned  = isMet && housePrice > 1500000000;
-  const capLimit  = isMet ? 600000000 : Infinity;
-  const maxLoan   = isBanned ? 0 : Math.min(dsrMax, ltvMax, capLimit);
+  // 수도권: 주택 시가별 대출 한도 3단계
+  // ~15억: 6억 / 15억초과~25억: 4억 / 25억초과: 2억
+  let capLimit = Infinity;
+  if(isMet) {
+    if     (housePrice > 2500000000) capLimit = 200000000;
+    else if(housePrice > 1500000000) capLimit = 400000000;
+    else                             capLimit = 600000000;
+  }
+  const maxLoan   = Math.min(dsrMax, ltvMax, capLimit);
   const principal = maxLoan;
 
   let constraintBy='DSR';
-  if(isBanned) constraintBy='BANNED';
-  else if(ltvMax<=dsrMax&&ltvMax<=capLimit) constraintBy='LTV';
-  else if(capLimit<dsrMax&&capLimit<ltvMax) constraintBy='CAP';
+  if(ltvMax<=dsrMax&&ltvMax<=capLimit) constraintBy='LTV';
+  if(capLimit<dsrMax&&capLimit<ltvMax) constraintBy='CAP';
 
   const monthlyA     =calcEq(principal,rate,months);
   const monthlyPrin  =principal/months;
@@ -1139,25 +1167,44 @@ function calc(){
 
   // 결과 화면(step-3)에서만 업데이트
   if (currentStep === 3) {
-    // 15억 초과 불가 경고
-    document.getElementById('ban-warn').style.display = isBanned ? 'block' : 'none';
+    // 수도권 단계별 한도 안내
+    const banWarn = document.getElementById('ban-warn');
+    const banText = document.getElementById('ban-warn-text');
+    if(isMet && capLimit < Infinity) {
+      banWarn.style.display = 'block';
+      if     (housePrice > 2500000000) banText.innerHTML = '⚠️ 수도권·규제지역 <b>25억 초과</b> 주택 — 대출 한도 <b>2억</b> 적용';
+      else if(housePrice > 1500000000) banText.innerHTML = '⚠️ 수도권·규제지역 <b>15억 초과</b> 주택 — 대출 한도 <b>4억</b> 적용';
+      else                             banText.innerHTML = '⚠️ 수도권·규제지역 — 대출 한도 <b>6억</b> 적용';
+    } else {
+      banWarn.style.display = 'none';
+    }
 
     // 대시보드
     document.getElementById('s-income').textContent  =fmtM(income);
-    document.getElementById('s-maxloan').textContent =isBanned ? '불가' : fmtM(maxLoan);
-    document.getElementById('s-monthly').textContent =isBanned ? '—' : fmtM(monthlyA);
-    document.getElementById('s-interest').textContent=isBanned ? '—' : fmtM(intA);
+    document.getElementById('s-maxloan').textContent =fmtM(maxLoan);
+    document.getElementById('s-monthly').textContent =fmtM(monthlyA);
+    document.getElementById('s-interest').textContent=fmtM(intA);
+    document.getElementById('s-maxloan').style.color = 'var(--green)';
 
     // 한도 근거
-    const subLabels={DSR:'DSR 한도로 제한됨',LTV:'LTV 한도로 제한됨',CAP:'대출금액 상한 6억 적용',BANNED:'15억 초과 — 주담대 불가'};
+    const capLabelMap = {
+      200000000:'대출 상한 2억 적용',
+      400000000:'대출 상한 4억 적용',
+      600000000:'대출 상한 6억 적용',
+    };
+    const subLabels={DSR:'DSR 한도로 제한됨',LTV:'LTV 한도로 제한됨',CAP: capLabelMap[capLimit]||'한도 상한 적용'};
     document.getElementById('s-maxloan-sub').textContent=subLabels[constraintBy]||'';
-    document.getElementById('s-maxloan').style.color = isBanned ? 'var(--red)' : 'var(--green)';
     document.getElementById('d-dsr').textContent=fmtFull(dsrMax);
     document.getElementById('d-ltv').textContent=fmtFull(ltvMax);
     document.getElementById('d-dsr').className='dash-limit-val'+(constraintBy==='DSR'?' active':'');
     document.getElementById('d-ltv').className='dash-limit-val'+(constraintBy==='LTV'?' active':'');
     document.getElementById('d-cap-item').style.display=isMet?'block':'none';
     document.getElementById('d-cap-div').style.display =isMet?'block':'none';
+    if(isMet) {
+      document.getElementById('d-cap-item').querySelector('.dash-limit-label').textContent='수도권 상한';
+      document.getElementById('d-cap-item').querySelector('.dash-limit-val').textContent=
+        housePrice>2500000000?'2억원':housePrice>1500000000?'4억원':'6억원';
+    }
 
     // 실제 필요 대출액 & 갭
     const actualLoan = savings > 0 ? Math.max(0, housePrice - savings) : maxLoan;
@@ -1245,6 +1292,58 @@ document.addEventListener('focusout', e => {
 });
 
 calc();
+
+function showRegionInfo() {
+  document.getElementById('sheet-emoji').textContent = '📍';
+  document.getElementById('sheet-title').textContent = '지역 등급이란?';
+  const tag = document.getElementById('sheet-tag');
+  tag.textContent = '지역에 따라 LTV·DSR·대출 한도가 달라져요';
+  tag.className = 'sheet-tag blue';
+  document.getElementById('sheet-desc').textContent =
+    '내 집이 위치한 지역의 규제 등급에 따라 빌릴 수 있는 한도가 크게 달라집니다. 모르겠으면 국토교통부 부동산 규제지역 조회에서 확인하세요.';
+  document.getElementById('sheet-pros').innerHTML = `
+    <div class="region-table">
+      <div class="rt-head">
+        <div class="rt-cell">지역 등급</div>
+        <div class="rt-cell">LTV</div>
+        <div class="rt-cell">DSR</div>
+        <div class="rt-cell">대출 상한</div>
+      </div>
+      <div class="rt-row">
+        <div class="rt-cell"><span class="rt-badge red">🔴 투기과열</span></div>
+        <div class="rt-cell mono">40%</div>
+        <div class="rt-cell mono">40%</div>
+        <div class="rt-cell mono red">6/4/2억</div>
+      </div>
+      <div class="rt-row">
+        <div class="rt-cell"><span class="rt-badge orange">🟠 조정대상</span></div>
+        <div class="rt-cell mono">50%</div>
+        <div class="rt-cell mono">40%</div>
+        <div class="rt-cell mono red">6/4/2억</div>
+      </div>
+      <div class="rt-row">
+        <div class="rt-cell"><span class="rt-badge yellow">🟡 일반지역</span></div>
+        <div class="rt-cell mono">70%</div>
+        <div class="rt-cell mono">50%</div>
+        <div class="rt-cell mono green">없음</div>
+      </div>
+      <div class="rt-row">
+        <div class="rt-cell"><span class="rt-badge green">🟢 비규제</span></div>
+        <div class="rt-cell mono">80%</div>
+        <div class="rt-cell mono">50%</div>
+        <div class="rt-cell mono green">없음</div>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.7;">
+      ※ 수도권·규제지역 대출 상한: 15억 이하 6억 / 15~25억 4억 / 25억 초과 2억<br>
+      ※ 생애최초는 모든 지역 LTV 최대 80%
+    </div>
+  `;
+  document.getElementById('sheet-calc-box').style.display = 'none';
+  document.getElementById('sheet-backdrop').classList.add('show');
+  document.getElementById('repay-sheet').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
 
 function showDebtInfo() {
   document.getElementById('sheet-emoji').textContent = '💡';
