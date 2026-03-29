@@ -100,6 +100,11 @@ body::before{
 .dash-mymoney-calc .hp{color:var(--text);}
 .dash-mymoney-calc .loan{color:var(--green);}
 .dash-mymoney-result{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--yellow);}
+#shortage-banner{background:rgba(248,113,113,0.1);border-bottom:1px solid rgba(248,113,113,0.25);}
+.shortage-inner{display:flex;align-items:center;gap:12px;padding:14px 18px;}
+.shortage-icon{font-size:24px;flex-shrink:0;}
+.shortage-title{font-family:'Jua',sans-serif;font-size:15px;color:var(--red);margin-bottom:3px;}
+.shortage-desc{font-size:12px;color:#fca5a5;line-height:1.5;}
 .dash-gap{display:flex;justify-content:space-between;align-items:center;padding:9px 18px;border-bottom:1px solid var(--border);font-size:12px;}
 .dash-gap-label{color:var(--muted);}
 .dash-gap-val{font-family:'DM Mono',monospace;font-weight:500;font-size:13px;}
@@ -554,6 +559,16 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;hei
 
   <!-- 대시보드 -->
   <div class="dashboard">
+    <!-- 자금 부족 강조 배너 -->
+    <div id="shortage-banner" style="display:none;">
+      <div class="shortage-inner">
+        <div class="shortage-icon">⚠️</div>
+        <div class="shortage-text">
+          <div class="shortage-title">자금이 부족해요!</div>
+          <div class="shortage-desc">보유자금 + 최대대출 = <span id="shortage-have">—</span> · 집값보다 <span id="shortage-amt" style="color:var(--red);font-weight:700;">—</span> 부족</div>
+        </div>
+      </div>
+    </div>
     <div class="dash-main">
       <div class="dash-item">
         <div class="dash-label">최대 대출 가능액</div>
@@ -1208,7 +1223,7 @@ function calc(){
 
     // 실제 필요 대출액 & 갭
     const actualLoan = savings > 0 ? Math.max(0, housePrice - savings) : maxLoan;
-    const usedLoan   = Math.min(actualLoan, maxLoan); // 실제 빌릴 금액
+    const usedLoan   = Math.min(actualLoan, maxLoan);
     const gap        = housePrice - savings - maxLoan; // 양수면 부족, 음수면 여유
 
     document.getElementById('mm-house').textContent   = fmtM(housePrice);
@@ -1216,17 +1231,27 @@ function calc(){
     document.getElementById('mm-need').textContent    = fmtFull(usedLoan);
     document.getElementById('mm-sub').textContent     = savings>0 ? '집값 − 보유자금' : '최대 대출 가능액';
 
+    // 자금 부족 배너 (보유자금 + 최대대출 < 집값일 때)
+    const shortageBanner = document.getElementById('shortage-banner');
+    if(gap > 0) {
+      shortageBanner.style.display = 'block';
+      document.getElementById('shortage-have').textContent = fmtFull(savings + maxLoan);
+      document.getElementById('shortage-amt').textContent  = fmtFull(gap);
+    } else {
+      shortageBanner.style.display = 'none';
+    }
+
     const gapRow   = document.getElementById('dash-gap-row');
     const gapLabel = document.getElementById('gap-label');
     const gapVal   = document.getElementById('gap-val');
     if(savings > 0){
       gapRow.style.display='flex';
       if(gap > 0){
-        gapLabel.textContent = '⚠️ 추가로 필요한 돈';
+        gapLabel.textContent = '추가로 필요한 돈';
         gapVal.textContent   = fmtFull(gap);
         gapVal.style.color   = 'var(--red)';
       } else {
-        gapLabel.textContent = '✅ 대출 없이도 가능한 여유';
+        gapLabel.textContent = '✅ 보유자금 여유';
         gapVal.textContent   = fmtFull(Math.abs(gap));
         gapVal.style.color   = 'var(--green)';
       }
